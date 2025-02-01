@@ -1,38 +1,19 @@
 from .joint import Joint
+import numpy as np
 
 class Arm:
-    def __init__(self):
-        self.joints = []
+    def __init__(self, joints=None, lengths=None):
+        try:
+            if joints and lengths and len(lengths) != len(joints):
+                raise ValueError(f"Lengths ({len(lengths)}) should equal the number of joints ({len(joints)})")
+        except ValueError as e:
+            print(f"Initialisation error: {e}")
+            joints, lengths = [], []
+        self.joints = joints if joints else []
+        self.lengths = lengths if lengths else []
 
     def add_joint(self, joint):
         self.joints.append(joint)
 
-    def move_joint(self, joint_name, angle):
-        for joint in self.joints:
-            if joint.name == joint_name:
-                joint.bend(angle)
-                return
-        raise ValueError(f"Joint {joint_name} not found")
-
-    def get_joint_states(self):
-        return {joint.name: joint.current_bend for joint in self.joints}
-
-# Example usage
-if __name__ == "__main__":
-    arm = Arm()
-    arm.add_joint(Joint("shoulder", 0, 180))
-    arm.add_joint(Joint("elbow", 0, 150))
-    
-    try:
-        print("Before moving joints:")
-        for joint in arm.joints:
-            print(f"{joint.name} current bend: {joint.current_bend}")
-        
-        arm.move_joint("shoulder", 90)
-        arm.move_joint("elbow", 45)
-        
-        print("After moving joints:")
-        for joint in arm.joints:
-            print(f"{joint.name} current bend: {joint.current_bend}")
-    except ValueError as e:
-        print(e)
+    def add_length(self, length):
+        self.lengths.append(length)

@@ -1,13 +1,18 @@
 class Joint:
-    def __init__(self, name, max_bend):
-        self.name = name
-        self.max_bend = max_bend
-        self.current_bend = 0
+    def __init__(self, max_angle):
+        self.max_angle = max_angle
+        self.current_angle = 0
 
-    def bend(self, angle):
-        if angle < -self.max_bend or angle > self.max_bend:
-            raise ValueError(f"Angle {angle} out of bounds for joint {self.name}")
-        self.current_bend = angle
+    def set_angle(self, angle):
+        if angle < -self.max_angle or angle > self.max_angle:
+            raise ValueError(f"Angle {angle} out of bounds for joint")
+        self.current_angle = angle
 
-    def __repr__(self):
-        return f"Joint(name={self.name}, current_bend={self.current_bend})"
+    def rotate_angle(self, delta_angle):
+        new_angle = self.current_angle + delta_angle
+        try:
+            if new_angle < -self.max_angle or new_angle > self.max_angle:
+                raise ValueError(f"Angle {new_angle} out of bounds for joint")
+            self.current_angle = new_angle
+        except ValueError as e:
+            print(e)
