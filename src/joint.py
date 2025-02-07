@@ -4,9 +4,12 @@ class Joint:
         self.current_angle = 0
 
     def set_angle(self, angle):
-        if angle < -self.max_angle or angle > self.max_angle:
-            raise ValueError(f"Angle {angle} out of bounds for joint")
-        self.current_angle = angle
+        try:
+            if angle < -self.max_angle or angle > self.max_angle:
+                raise ValueError(f"Angle {angle} out of bounds for joint")
+            self.current_angle = angle
+        except ValueError as e:
+            print(e)
 
     def rotate_angle(self, delta_angle):
         new_angle = self.current_angle + delta_angle

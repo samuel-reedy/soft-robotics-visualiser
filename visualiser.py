@@ -19,6 +19,34 @@ def draw_x(canvas, position, size=5, color="red"):
     canvas.create_line(position.x - size, position.y - size, position.x + size, position.y + size, fill=color)
     canvas.create_line(position.x - size, position.y + size, position.x + size, position.y - size, fill=color)
 
+def calculate_reach_envelope(base_position, arm):
+    points = []
+    for shoulder_angle in range(0, 361, 5):
+        for elbow_angle in range(0, 181, 5):
+            try:
+                arm.joints[0].set_angle(shoulder_angle)
+                arm.joints[1].set_angle(elbow_angle)
+            except ValueError:
+                continue
+            cumulative_angle = 0
+            current_position = base_position
+            for i in range(len(arm.joints)):
+                joint = arm.joints[i]
+                cumulative_angle += joint.current_angle
+                angle = np.deg2rad(cumulative_angle)
+                length = arm.lengths[i]
+                next_position = Position(
+                    current_position.x + length * np.cos(angle),
+                    current_position.y - length * np.sin(angle)
+                )
+                current_position = next_position
+            points.append((current_position.x, current_position.y))
+    return points
+
+def draw_reach_envelope(canvas, points):
+    for point in points:
+        draw_circle(canvas, Position(point[0], point[1]), 1, color="gray")
+
 window = tk.Tk()          
 
 canvas = tk.Canvas(window, width=400, height=400)
@@ -26,6 +54,7 @@ canvas.pack()
 
 def draw_arm(canvas, arm, base_position):
     canvas.delete("all")
+    draw_reach_envelope(canvas, reach_envelope_points)
     current_position = base_position
     cumulative_angle = 0
     for i in range(len(arm.joints)):
@@ -74,9 +103,10 @@ def update_position(x, y):
     draw_x(canvas, Position(base_position.x + x_slider.get(), base_position.y - y_slider.get()), color="green")
 
 base_position = Position(200, 200)
-shoulder = Joint(360)
+shoulder = Joint(180)
 elbow = Joint(135)
 arm = Arm([shoulder, elbow], [100, 50])
+reach_envelope_points = calculate_reach_envelope(base_position, arm)
 draw_arm(canvas, arm, base_position)
 
 # Create sliders for x and y positions
